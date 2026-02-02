@@ -4,7 +4,7 @@ export function useDebounce<T extends (...args: any[]) => void>(
   callback: T,
   delay: number
 ): T {
-  const timeoutRef = useRef<NodeJS.Timeout>()
+  const timeoutRef = useRef<number | undefined>(undefined)
 
   return useCallback(
     ((...args: Parameters<T>) => {
@@ -12,7 +12,7 @@ export function useDebounce<T extends (...args: any[]) => void>(
         clearTimeout(timeoutRef.current)
       }
       
-      timeoutRef.current = setTimeout(() => {
+      timeoutRef.current = window.setTimeout(() => {
         callback(...args)
       }, delay)
     }) as T,
@@ -40,7 +40,7 @@ export function useThrottle<T extends (...args: any[]) => void>(
 export function useAnimationFrame<T extends (...args: any[]) => void>(
   callback: T
 ): T {
-  const rafRef = useRef<number>()
+  const rafRef = useRef<number | undefined>(undefined)
 
   return useCallback(
     ((...args: Parameters<T>) => {
