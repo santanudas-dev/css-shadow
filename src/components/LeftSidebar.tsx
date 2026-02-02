@@ -18,6 +18,22 @@ import { Switch } from "@/components/ui/switch"
 import { useRef, useState, useCallback } from "react"
 import { FloatingColorPicker } from "./FloatingColorPicker"
 
+type RGBA = {
+  r: number
+  g: number
+  b: number
+  a: number
+}
+
+type HSVA = {
+  h: number
+  s: number
+  v: number
+  a: number
+}
+
+type FormattedColor = string | RGBA | HSVA
+
 
 export default function LeftSidebar() {
   const {
@@ -35,9 +51,12 @@ export default function LeftSidebar() {
   const colorAnchorRef = useRef<HTMLDivElement | null>(null)
   const [colorPickerOpen, setColorPickerOpen] = useState(false)
 
-  const handleColorChange = useCallback((color: string) => {
+  const handleColorChange = useCallback((color: FormattedColor) => {
     if (activeShadow) {
-      updateShadow(activeShadow.id, { color: String(color) });
+      const colorString = typeof color === 'string' ? color : 
+        'r' in color ? `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})` :
+        `hsla(${color.h}, ${color.s}%, ${color.v}%, ${color.a})`
+      updateShadow(activeShadow.id, { color: colorString });
     }
   }, [activeShadow, updateShadow]);
 

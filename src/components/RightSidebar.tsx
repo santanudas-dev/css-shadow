@@ -235,12 +235,20 @@ export default function RightSidebar() {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
 
-    if (over && active.id !== over.id) {
+    if (over && active.id !== over.id && activeCardId) {
       const oldIndex = shadows.findIndex((s) => s.id === active.id)
       const newIndex = shadows.findIndex((s) => s.id === over.id)
 
       const newShadows = arrayMove(shadows, oldIndex, newIndex)
-      useShadowStore.setState({ shadows: newShadows })
+      
+      // Update the shadows for the active card
+      useShadowStore.setState(state => ({
+        cards: state.cards.map(c => 
+          c.id === activeCardId 
+            ? { ...c, shadows: newShadows }
+            : c
+        )
+      }))
     }
   }
 
