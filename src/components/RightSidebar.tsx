@@ -14,6 +14,22 @@ import { FloatingColorPicker } from './FloatingColorPicker'
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ScrollArea } from "@/components/ui/scroll-area"
 
+type RGBA = {
+  r: number
+  g: number
+  b: number
+  a: number
+}
+
+type HSVA = {
+  h: number
+  s: number
+  v: number
+  a: number
+}
+
+type FormattedColor = string | RGBA | HSVA
+
 const PRESETS = [
   {
     name: 'Soft',
@@ -257,12 +273,18 @@ export default function RightSidebar() {
   const cardBgColorAnchorRef = useRef<HTMLDivElement | null>(null)
   const canvasBgColorAnchorRef = useRef<HTMLDivElement | null>(null)
 
-  const handleCardBgColorChange = useCallback((color: string) => {
-    setCardBgColor(color)
+  const handleCardBgColorChange = useCallback((color: FormattedColor) => {
+    const colorString = typeof color === 'string' ? color : 
+      'r' in color ? `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})` :
+      `hsla(${color.h}, ${color.s}%, ${color.v}%, ${color.a})`
+    setCardBgColor(colorString)
   }, [setCardBgColor])
 
-  const handleCanvasBgColorChange = useCallback((color: string) => {
-    setCanvasBgColor(color)
+  const handleCanvasBgColorChange = useCallback((color: FormattedColor) => {
+    const colorString = typeof color === 'string' ? color : 
+      'r' in color ? `rgba(${color.r}, ${color.g}, ${color.b}, ${color.a})` :
+      `hsla(${color.h}, ${color.s}%, ${color.v}%, ${color.a})`
+    setCanvasBgColor(colorString)
   }, [setCanvasBgColor])
 
 
