@@ -8,11 +8,33 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  body {
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  
+  .mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  button, .cursor-pointer {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 .layers::-webkit-scrollbar {
   width: 4px;
-  height: 2px;          /* keep scrollbar usable */
+  height: 2px;
 }
 
 .layers::-webkit-scrollbar-track {
@@ -30,11 +52,20 @@ body {
   height: 0;
 }
 
+/* Performance optimizations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.smooth-transition {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
 
 @layer utilities {
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE & old Edge */
-    scrollbar-width: none;    /* Firefox */
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 
   .no-scrollbar::-webkit-scrollbar {
@@ -51,6 +82,20 @@ body {
     width: 0px;
     height: 0px;
     background: transparent;
+  }
+  
+  /* Mobile-first responsive utilities */
+  .mobile-padding {
+    @apply px-4 py-2;
+  }
+  
+  .desktop-padding {
+    @apply md:px-6 md:py-4;
+  }
+  
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
   }
 }   
 

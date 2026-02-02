@@ -1,4 +1,3 @@
-// File: src/components/RightSidebar.tsx
 import { useShadowStore } from '../store/shadowStore'
 import { Plus, Layers, GripVertical, Copy, Magnet } from 'lucide-react'
 import { useEffect, useRef, useState, useCallback } from 'react'
@@ -223,7 +222,6 @@ export default function RightSidebar() {
 
   const layersRef = useRef<HTMLDivElement>(null)
 
-
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -241,7 +239,6 @@ export default function RightSidebar() {
 
       const newShadows = arrayMove(shadows, oldIndex, newIndex)
       
-      // Update the shadows for the active card
       useShadowStore.setState(state => ({
         cards: state.cards.map(c => 
           c.id === activeCardId 
@@ -294,7 +291,6 @@ export default function RightSidebar() {
       `hsla(${color.h}, ${color.s}%, ${color.v}%, ${color.a})`
     setCanvasBgColor(colorString)
   }, [setCanvasBgColor])
-
 
   return (
     <div className="w-full h-full min-w-50 border-l border-gray-200 dark:border-gray-700 bg-white dark:bg-[#0d1117] transition-all duration-300 flex flex-col">
@@ -561,7 +557,7 @@ export default function RightSidebar() {
               </ScrollArea>
 
               <p className="mt-2 text-xs text-muted-foreground">
-                Click “Copy” to copy the CSS to your clipboard.
+                Click "Copy" to copy the CSS to your clipboard.
               </p>
             </CardContent>
           </Card>

@@ -23,6 +23,13 @@ export interface Card {
   radius: number
 }
 
+interface HistoryState {
+  cards: Card[]
+  activeCardId: string | null
+  activeShadowId: string | null
+  canvasBgColor: string
+}
+
 interface ShadowState {
   cards: Card[]
   activeCardId: string | null
@@ -30,6 +37,8 @@ interface ShadowState {
   darkMode: boolean
   canvasBgColor: string
   zoom: number
+  history: HistoryState[]
+  historyIndex: number
   addCard: () => void
   removeCard: (id: string) => void
   setActiveCard: (id: string) => void
@@ -45,6 +54,11 @@ interface ShadowState {
   duplicateShadow: (id: string) => void
   loadPreset: (shadows: Shadow[], append?: boolean) => void
   setZoom: (zoom: number) => void
+  undo: () => void
+  redo: () => void
+  canUndo: () => boolean
+  canRedo: () => boolean
+  saveToHistory: () => void
 }
 
 let shadowCounter = 0
@@ -61,13 +75,19 @@ export const useShadowStore = create<ShadowState>((set, get) => {
     radius: 16
   }
   
-  return {
+  const initialState = {
     cards: [initialCard],
     activeCardId: initialCard.id,
     activeShadowId: null,
+    canvasBgColor: '#f3f4f6'
+  }
+  
+  return {
+    ...initialState,
     darkMode: false,
-    canvasBgColor: '#f3f4f6',
     zoom: 1,
+    history: [initialState],
+    historyIndex: 0,
 
   addCard: () => {
     const state = get()
@@ -89,6 +109,7 @@ export const useShadowStore = create<ShadowState>((set, get) => {
       cards: [...state.cards, newCard],
       activeCardId: newCard.id
     })
+    get().saveToHistory()
     ;(window as any).showToast?.(`${newCard.name} created`, 'success')
   },
 
@@ -146,6 +167,7 @@ export const useShadowStore = create<ShadowState>((set, get) => {
       ),
       activeShadowId: newShadow.id,
     })
+    get().saveToHistory()
   },
 
   removeShadow: (id: string) => {
@@ -190,6 +212,12 @@ export const useShadowStore = create<ShadowState>((set, get) => {
           : c
       )
     })
+    // Debounce history saving for performance
+    const debouncedSave = setTimeout(() => {
+      get().saveToHistory()
+    }, 300)
+    clearTimeout((get() as any).debouncedSaveTimeout)
+    ;(set as any)({ debouncedSaveTimeout: debouncedSave })
   },
 
   setActiveShadow: (id: string) => {
@@ -219,6 +247,7 @@ export const useShadowStore = create<ShadowState>((set, get) => {
           : c
       )
     })
+    get().saveToHistory()
   },
 
   setCanvasBgColor: (color: string) => {
@@ -234,6 +263,7 @@ export const useShadowStore = create<ShadowState>((set, get) => {
           : c
       )
     })
+    get().saveToHistory()
   },
 
   setCardRadius: (radius: number) => {
@@ -245,6 +275,7 @@ export const useShadowStore = create<ShadowState>((set, get) => {
           : c
       )
     })
+    get().saveToHistory()
   },
 
   duplicateShadow: (id: string) => {
@@ -318,6 +349,60 @@ export const useShadowStore = create<ShadowState>((set, get) => {
 
   setZoom: (zoom: number) => {
     set({ zoom })
+  },
+
+  saveToHistory: () => {
+    const state = get()
+    const currentState: HistoryState = {
+      cards: JSON.parse(JSON.stringify(state.cards)),
+      activeCardId: state.activeCardId,
+      activeShadowId: state.activeShadowId,
+      canvasBgColor: state.canvasBgColor
+    }
+    
+    const newHistory = state.history.slice(0, state.historyIndex + 1)
+    newHistory.push(currentState)
+    
+    // Limit history to 50 states
+    if (newHistory.length > 50) {
+      newHistory.shift()
+    } else {
+      set({ historyIndex: state.historyIndex + 1 })
+    }
+    
+    set({ history: newHistory })
+  },
+
+  undo: () => {
+    const state = get()
+    if (state.historyIndex > 0) {
+      const prevState = state.history[state.historyIndex - 1]
+      set({
+        ...prevState,
+        historyIndex: state.historyIndex - 1
+      })
+    }
+  },
+
+  redo: () => {
+    const state = get()
+    if (state.historyIndex < state.history.length - 1) {
+      const nextState = state.history[state.historyIndex + 1]
+      set({
+        ...nextState,
+        historyIndex: state.historyIndex + 1
+      })
+    }
+  },
+
+  canUndo: () => {
+    const state = get()
+    return state.historyIndex > 0
+  },
+
+  canRedo: () => {
+    const state = get()
+    return state.historyIndex < state.history.length - 1
   },
 
   }

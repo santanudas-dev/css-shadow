@@ -1,4 +1,3 @@
-// File: src/components/LeftSidebar.tsx
 import { useShadowStore } from '../store/shadowStore'
 import { Trash2, Copy } from 'lucide-react'
 import { Slider } from "@/components/ui/slider"
@@ -34,7 +33,6 @@ type HSVA = {
 
 type FormattedColor = string | RGBA | HSVA
 
-
 export default function LeftSidebar() {
   const {
     cards,
@@ -68,7 +66,6 @@ export default function LeftSidebar() {
     setColorPickerOpen(true);
   }, []);
 
-
   if (!activeShadow) {
     return (
       <div className="w-80 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 overflow-y-auto">
@@ -96,7 +93,6 @@ export default function LeftSidebar() {
                 <Copy size={16} />
               </Button>
             </TooltipTrigger>
-
             <TooltipContent>
               <p>Duplicate</p>
             </TooltipContent>
@@ -112,7 +108,6 @@ export default function LeftSidebar() {
                 <Trash2 size={16} />
               </Button>
             </TooltipTrigger>
-
             <TooltipContent>
               <p>Delete</p>
             </TooltipContent>
@@ -122,11 +117,11 @@ export default function LeftSidebar() {
 
       <div className="space-y-5">
         <Field>
-          <FieldLabel htmlFor="input-field-username">Name</FieldLabel>
+          <FieldLabel htmlFor="shadow-name">Name</FieldLabel>
           <Input
-            id="input-field-username"
+            id="shadow-name"
             type="text"
-            placeholder="Enter your username"
+            placeholder="Shadow name"
             value={activeShadow.name}
             onChange={(e) =>
               updateShadow(activeShadow.id, { name: e.target.value })
@@ -183,17 +178,13 @@ export default function LeftSidebar() {
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Color
           </label>
-
           <div className="flex gap-2 items-center">
-            {/* Color swatch (anchor) */}
             <div
               ref={colorAnchorRef}
               onClick={handleColorSwatchClick}
               className="w-12 h-10 cursor-pointer border border-gray-200 dark:border-gray-700 rounded"
               style={{ backgroundColor: activeShadow.color }}
             />
-
-            {/* Hex input (still useful) */}
             <Input
               type="text"
               value={activeShadow.color}
@@ -212,9 +203,7 @@ export default function LeftSidebar() {
               onClose={handleColorPickerClose}
             />
           )}
-
         </div>
-
 
         <div>
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -265,7 +254,6 @@ export default function LeftSidebar() {
             }
             className="data-[state=checked]:bg-blue-600"
           />
-
         </div>
       </div>
     </div>
