@@ -161,15 +161,32 @@ export const useShadowStore = create<ShadowState>((set, get) => {
       enabled: true,
     }
     
+    const nextCards = state.cards.map(c =>
+      c.id === state.activeCardId
+        ? { ...c, shadows: [...c.shadows, newShadow] }
+        : c
+    )
+    const nextActiveShadowId = newShadow.id
+
     set({
-      cards: state.cards.map(c => 
-        c.id === state.activeCardId 
-          ? { ...c, shadows: [...c.shadows, newShadow] }
-          : c
-      ),
-      activeShadowId: newShadow.id,
+      cards: nextCards,
+      activeShadowId: nextActiveShadowId,
     })
-    get().saveToHistory()
+
+    if (historyMode === "replace") {
+      const baseline: HistoryState = {
+        cards: JSON.parse(JSON.stringify(nextCards)),
+        activeCardId: state.activeCardId,
+        activeShadowId: nextActiveShadowId,
+        canvasBgColor: state.canvasBgColor
+      }
+      set({
+        history: [baseline],
+        historyIndex: 0
+      })
+    } else {
+      get().saveToHistory()
+    }
   },
 
   removeShadow: (id: string) => {
@@ -309,32 +326,15 @@ export const useShadowStore = create<ShadowState>((set, get) => {
       name: newName,
     }
 
-    const nextCards = state.cards.map(c =>
-      c.id === state.activeCardId
-        ? { ...c, shadows: [...c.shadows, newShadow] }
-        : c
-    )
-    const nextActiveShadowId = newShadow.id
-
     set({
-      cards: nextCards,
-      activeShadowId: nextActiveShadowId,
+      cards: state.cards.map(c => 
+        c.id === state.activeCardId 
+          ? { ...c, shadows: [...c.shadows, newShadow] }
+          : c
+      ),
+      activeShadowId: newShadow.id,
     })
-
-    if (historyMode === "replace") {
-      const baseline: HistoryState = {
-        cards: JSON.parse(JSON.stringify(nextCards)),
-        activeCardId: state.activeCardId,
-        activeShadowId: nextActiveShadowId,
-        canvasBgColor: state.canvasBgColor
-      }
-      set({
-        history: [baseline],
-        historyIndex: 0
-      })
-    } else {
-      get().saveToHistory()
-    }
+    get().saveToHistory()
   },
 
 

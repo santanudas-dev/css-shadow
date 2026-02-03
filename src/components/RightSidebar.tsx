@@ -342,7 +342,7 @@ export default function RightSidebar() {
                 </div>
               </div>
               <Button
-                onClick={addShadow}
+                onClick={() => addShadow()}
                 size="sm"
                 className="bg-blue-600 hover:bg-blue-700 text-white transition-colors"
                 title="Add Shadow Layer"
@@ -361,7 +361,7 @@ export default function RightSidebar() {
                   Create your first shadow to get started
                 </p>
                 <Button
-                  onClick={addShadow}
+                  onClick={() => addShadow()}
                   size="sm"
                   className="bg-blue-600 hover:bg-blue-700 text-white"
                 >
