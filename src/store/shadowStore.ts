@@ -18,6 +18,7 @@ export interface Card {
   name: string
   shadows: Shadow[]
   bgColor: string
+  darkBgColor: string
   width: number
   height: number
   radius: number
@@ -28,6 +29,7 @@ interface HistoryState {
   activeCardId: string | null
   activeShadowId: string | null
   canvasBgColor: string
+  canvasDarkBgColor: string
 }
 
 interface ShadowState {
@@ -36,6 +38,9 @@ interface ShadowState {
   activeShadowId: string | null
   darkMode: boolean
   canvasBgColor: string
+  canvasDarkBgColor: string
+  canvasDarkMode: boolean
+  canvasThemeLocked: boolean
   zoom: number
   history: HistoryState[]
   historyIndex: number
@@ -44,11 +49,16 @@ interface ShadowState {
   setActiveCard: (id: string) => void
   addShadow: (options?: { historyMode?: "push" | "replace" }) => void
   removeShadow: (id: string) => void
+  removeShadows: (ids: string[]) => void
   updateShadow: (id: string, updates: Partial<Shadow>) => void
   setActiveShadow: (id: string) => void
   toggleDarkMode: () => void
+  toggleCanvasTheme: () => void
+  toggleCanvasThemeLock: () => void
   setCardBgColor: (color: string) => void
+  setCardDarkBgColor: (color: string) => void
   setCanvasBgColor: (color: string) => void
+  setCanvasDarkBgColor: (color: string) => void
   setCardDimensions: (width: number, height: number) => void
   setCardRadius: (radius: number) => void
   duplicateShadow: (id: string) => void
@@ -70,21 +80,25 @@ export const useShadowStore = create<ShadowState>((set, get) => {
     name: 'Card 1',
     shadows: [],
     bgColor: '#ffffff',
+    darkBgColor: '#000000',
     width: 300,
     height: 200,
-    radius: 16
+    radius: 2
   }
   
   const initialState = {
     cards: [initialCard],
     activeCardId: initialCard.id,
     activeShadowId: null,
-    canvasBgColor: '#f3f4f6'
+    canvasBgColor: '#fcfaf4',
+    canvasDarkBgColor: '#303030'
   }
   
   return {
     ...initialState,
     darkMode: false,
+    canvasDarkMode: false,
+    canvasThemeLocked: true,
     zoom: 1,
     history: [initialState],
     historyIndex: 0,
@@ -101,6 +115,7 @@ export const useShadowStore = create<ShadowState>((set, get) => {
       name: `Card ${state.cards.length + 1}`,
       shadows: [],
       bgColor: '#ffffff',
+      darkBgColor: '#000000',
       width: 300,
       height: 200,
       radius: 16
@@ -178,7 +193,8 @@ export const useShadowStore = create<ShadowState>((set, get) => {
         cards: JSON.parse(JSON.stringify(nextCards)),
         activeCardId: state.activeCardId,
         activeShadowId: nextActiveShadowId,
-        canvasBgColor: state.canvasBgColor
+        canvasBgColor: state.canvasBgColor,
+        canvasDarkBgColor: state.canvasDarkBgColor
       }
       set({
         history: [baseline],
@@ -222,6 +238,42 @@ export const useShadowStore = create<ShadowState>((set, get) => {
     ;(window as any).showToast?.(`${shadowToDelete?.name || 'Shadow'} deleted`, 'info')
   },
 
+  removeShadows: (ids: string[]) => {
+    const state = get()
+    const activeCard = state.cards.find(c => c.id === state.activeCardId)
+    if (!activeCard) return
+
+    const idsToRemove = new Set(ids)
+    const newShadows = activeCard.shadows.filter(s => !idsToRemove.has(s.id))
+    const removedCount = activeCard.shadows.length - newShadows.length
+    if (removedCount === 0) return
+    if (newShadows.length === 0) {
+      ;(window as any).showToast?.('Cannot delete the last shadow', 'warning')
+      return
+    }
+
+    const activeShadowWasRemoved =
+      state.activeShadowId !== null && idsToRemove.has(state.activeShadowId)
+    const previousActiveIndex = activeCard.shadows.findIndex(
+      s => s.id === state.activeShadowId
+    )
+    const nextActiveShadowId = activeShadowWasRemoved
+      ? newShadows[Math.min(Math.max(previousActiveIndex, 0), newShadows.length - 1)].id
+      : state.activeShadowId
+
+    set({
+      cards: state.cards.map(c =>
+        c.id === state.activeCardId ? { ...c, shadows: newShadows } : c
+      ),
+      activeShadowId: nextActiveShadowId
+    })
+    get().saveToHistory()
+    ;(window as any).showToast?.(
+      `${removedCount} shadow${removedCount === 1 ? '' : 's'} deleted`,
+      'info'
+    )
+  },
+
 
   updateShadow: (id: string, updates: Partial<Shadow>) => {
     const state = get()
@@ -257,6 +309,24 @@ export const useShadowStore = create<ShadowState>((set, get) => {
     })
   },
 
+  toggleCanvasTheme: () => {
+    const state = get()
+    if (state.canvasThemeLocked) {
+      get().toggleDarkMode()
+      return
+    }
+
+    set((currentState) => ({ canvasDarkMode: !currentState.canvasDarkMode }))
+  },
+
+  toggleCanvasThemeLock: () => {
+    const state = get()
+    set({
+      canvasThemeLocked: !state.canvasThemeLocked,
+      ...(state.canvasThemeLocked ? { canvasDarkMode: state.darkMode } : {})
+    })
+  },
+
 
   setCardBgColor: (color: string) => {
     const state = get()
@@ -270,8 +340,25 @@ export const useShadowStore = create<ShadowState>((set, get) => {
     get().saveToHistory()
   },
 
+  setCardDarkBgColor: (color: string) => {
+    const state = get()
+    set({
+      cards: state.cards.map(c =>
+        c.id === state.activeCardId
+          ? { ...c, darkBgColor: color }
+          : c
+      )
+    })
+    get().saveToHistory()
+  },
+
   setCanvasBgColor: (color: string) => {
     set({ canvasBgColor: color })
+    get().saveToHistory()
+  },
+
+  setCanvasDarkBgColor: (color: string) => {
+    set({ canvasDarkBgColor: color })
     get().saveToHistory()
   },
 
@@ -380,7 +467,8 @@ export const useShadowStore = create<ShadowState>((set, get) => {
       cards: JSON.parse(JSON.stringify(state.cards)),
       activeCardId: state.activeCardId,
       activeShadowId: state.activeShadowId,
-      canvasBgColor: state.canvasBgColor
+      canvasBgColor: state.canvasBgColor,
+      canvasDarkBgColor: state.canvasDarkBgColor
     }
     
     const newHistory = state.history.slice(0, state.historyIndex + 1)

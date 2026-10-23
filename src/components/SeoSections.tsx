@@ -80,7 +80,7 @@ export default function SeoSections() {
     <section
       id="learn"
       aria-labelledby="shadow-generator-guide"
-      className="border-t bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-950"
+      className="border-t bg-[#fcfaf4] dark:bg-[#303030]"
     >
       <div className="max-w-6xl mx-auto px-6 py-16">
         <div className="flex flex-col gap-4">
@@ -129,7 +129,7 @@ export default function SeoSections() {
         </div>
 
         <div id="beginner-guide" className="mt-12">
-          <Card>
+          <Card >
             <CardHeader>
               <CardTitle>Beginner Guide: Make Your First Shadow</CardTitle>
               <CardDescription>
