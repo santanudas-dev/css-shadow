@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useShadowStore } from "../store/shadowStore";
 import { Sun, Moon, Undo2, Redo2, Info, X } from "lucide-react";

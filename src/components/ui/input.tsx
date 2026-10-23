@@ -10,11 +10,14 @@ import {
 
 import { cn } from "@/lib/utils";
 
-export interface InputProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "value"> {
+export type InputProps = Omit<
+  HTMLMotionProps<"input">,
+  "value" | "onChange" | "onScroll"
+> & {
   value?: string;
-  motionProps?: HTMLMotionProps<"input">;
-}
+  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  onScroll?: React.UIEventHandler<HTMLInputElement>;
+};
 
 interface CharItem {
   id: string;
@@ -78,7 +81,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
       value = "",
       onChange,
       placeholder,
-      motionProps,
       onScroll,
       ...props
     },
@@ -197,7 +199,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         {/* Native functional input */}
         <motion.input
           {...props}
-          {...motionProps}
           ref={setRef}
           type={type}
           step={1}
@@ -225,7 +226,6 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
             "dark:focus-visible:border-white/20",
             "disabled:pointer-events-none disabled:opacity-50 rounded-xs",
             className,
-            motionProps?.className,
           )}
         />
       </div>
